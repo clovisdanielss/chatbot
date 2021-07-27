@@ -1,44 +1,35 @@
 import os
-
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import pandas as pd
-from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
+import json
+from training.default_training import DefaultTraining
 from tensorflow import keras
 import tensorflow as tf
 import logging
 import numpy as np
-import json
+from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
 from util import Util
 
 logging.basicConfig(level=logging.INFO, handlers=[logging.FileHandler("../info.txt", 'w', 'utf-8')])
 log = logging.getLogger("training-log")
 
 
-class Training:
+class TrainingIntent(DefaultTraining):
 
     def __init__(self, path, EMBEDDING_DIM=100):
-        self.intents = pd.read_json(path)
-        self.stopwords = None
-        self.preprocessing_data = None
-        self.model = None
-        self.to_vector = None
+        super().__init__(path, EMBEDDING_DIM)
+        self.data = pd.read_json(path)
         self.EMBEDDING_DIM = EMBEDDING_DIM
 
-    def read_intents(self, path):
-        self.intents = pd.read_json(path)
-
-    def define_stopwords(self, stopwords):
-        self.stopwords = stopwords
-
     def __preprocess__(self):
-        if self.intents is None:
+        if self.data is None:
             raise ValueError("Intent must not be None")
         phrases = []
-        for i in range(self.intents.shape[0]):
-            for phrase in self.intents.iloc[i]["phrases"]:
+        for i in range(self.data.shape[0]):
+            for phrase in self.data.iloc[i]["phrases"]:
                 phrase = Util.remove_punctuation(phrase)
                 phrase = Util.remove_stopwords(phrase, self.stopwords)
-                phrases.append((self.intents.iloc[i].name, phrase))
+                phrases.append((self.data.iloc[i].name, phrase))
         self.preprocessing_data = pd.DataFrame(phrases, columns=["class", "phrase"])
 
     def __vectorize__(self):
@@ -55,8 +46,8 @@ class Training:
         padding = len(self.preprocessing_data["tokenized"].iloc[0])
         self.model = keras.Sequential([
             keras.layers.Embedding(len(self.to_vector.get_vocabulary()), self.EMBEDDING_DIM, input_length=padding),
-            keras.layers.LSTM(self.intents.shape[0]),
-            keras.layers.Dense(self.intents.shape[0], activation="softmax")
+            keras.layers.LSTM(self.data.shape[0]),
+            keras.layers.Dense(self.data.shape[0], activation="softmax")
         ])
 
     def __compile_model__(self):
@@ -90,6 +81,6 @@ class Training:
 
 if __name__ == '__main__':
     path = os.path.join(os.path.dirname(__file__), "../dataset/intents.json")
-    training = Training(path)
+    training = TrainingIntent(path)
     training.execute()
     training.save_model(os.path.join(os.path.dirname(__file__), "../chatbot"))
