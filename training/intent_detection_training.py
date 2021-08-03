@@ -22,8 +22,7 @@ class TrainingIntent(DefaultTraining):
         self.EMBEDDING_DIM = EMBEDDING_DIM
 
     def __preprocess__(self):
-        if self.data is None:
-            raise ValueError("Intent must not be None")
+        super(TrainingIntent, self).__preprocess__()
         phrases = []
         for i in range(self.data.shape[0]):
             for phrase in self.data.iloc[i]["phrases"]:
@@ -33,16 +32,14 @@ class TrainingIntent(DefaultTraining):
         self.preprocessing_data = pd.DataFrame(phrases, columns=["class", "phrase"])
 
     def __vectorize__(self):
+        super(TrainingIntent, self).__vectorize__()
         self.to_vector = TextVectorization(output_mode="int")
-        if self.preprocessing_data is None:
-            raise ValueError("preprocessing_data must not be None. Call first __preprocess__")
         self.to_vector.adapt(self.preprocessing_data.phrase.to_list())
         tensor = self.to_vector(self.preprocessing_data["phrase"].to_numpy())
         self.preprocessing_data["tokenized"] = tensor.numpy().tolist()
 
     def __build_model__(self):
-        if self.preprocessing_data is None or self.to_vector is None:
-            raise ValueError("Must execute first __preprocess__ or __vectorize__")
+        super(TrainingIntent, self).__build_model__()
         padding = len(self.preprocessing_data["tokenized"].iloc[0])
         self.model = keras.Sequential([
             keras.layers.Embedding(len(self.to_vector.get_vocabulary()), self.EMBEDDING_DIM, input_length=padding),
@@ -51,6 +48,7 @@ class TrainingIntent(DefaultTraining):
         ])
 
     def __compile_model__(self):
+        super(TrainingIntent, self).__compile_model__()
         self.model.summary(print_fn=lambda x: log.info(x))
         self.model.compile(optimizer='adam',
                            loss=tf.losses.CategoricalCrossentropy(from_logits=True),
@@ -71,8 +69,7 @@ class TrainingIntent(DefaultTraining):
         print(history.history['accuracy'][-1])
 
     def save_model(self, path):
-        if self.model is None:
-            raise ValueError("Model does not exists yet")
+        super(TrainingIntent, self).save_model(path)
         self.model.save(path + ".h5")
         vocabulary = self.to_vector.get_vocabulary()
         with open("../vocabulary.json", "w", encoding='utf-8') as json_file:

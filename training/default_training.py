@@ -21,19 +21,29 @@ class DefaultTraining:
         self.stopwords = stopwords
 
     def __preprocess__(self):
+        if self.data is None:
+            raise ValueError("Intent must not be None")
         pass
 
     def __vectorize__(self):
+        if self.preprocessing_data is None:
+            raise ValueError("preprocessing_data must not be None. Call first __preprocess__")
         pass
 
     def __build_model__(self):
+        if self.preprocessing_data is None or self.to_vector is None:
+            raise ValueError("Must execute first __preprocess__ or __vectorize__")
         pass
 
     def __compile_model__(self):
+        if self.model is None:
+            raise ValueError("Model does not exists yet")
         pass
 
     def execute(self):
         pass
 
     def save_model(self, path):
+        if self.model is None:
+            raise ValueError("Model does not exists yet")
         pass

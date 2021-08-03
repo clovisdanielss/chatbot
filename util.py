@@ -1,5 +1,5 @@
 class Util:
-    punctuation = ["?", ".", ",", "!", ";", ":"]
+    punctuation = ["?", ".", ",", "!", ";", ":", ")", "(", "\"", "/", "\\", "-", "“", "”", "@", "+"]
 
     @staticmethod
     def remove_punctuation(phrase):

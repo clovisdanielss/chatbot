@@ -8,7 +8,7 @@ import json
 
 class IntentPredictor:
 
-    def __init__(self, path_model, path_vocabulary):
+    def __init__(self, path_model: str, path_vocabulary: str) -> None:
         self.path_model = path_model
         self.path_vocabulary = path_vocabulary
         self.to_vector = None
@@ -16,7 +16,7 @@ class IntentPredictor:
             self.to_vector = TextVectorization(output_mode="int", vocabulary=json.load(vocabulary))
         self.model = tf.keras.models.load_model(path_model)
 
-    def __padding__(self, phrase):
+    def __padding__(self, phrase: str) -> np.ndarray:
         if self.model is None:
             raise ValueError("Padding only works with an defined model")
         shape = self.model.get_config()["layers"][0]["config"]["batch_input_shape"][1]
@@ -25,7 +25,7 @@ class IntentPredictor:
         result[:input.shape[0]] = input
         return result
 
-    def predict(self, phrase, debug=False):
+    def predict(self, phrase: str, debug: bool = False) -> (int, float):
         if self.to_vector is None or self.model is None:
             raise ValueError("TextVectorization to_vector must not be None.")
         input = self.__padding__(phrase)
