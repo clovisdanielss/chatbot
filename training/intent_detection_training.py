@@ -3,17 +3,10 @@ import random
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import pandas as pd
-import json
 from training.default_training import DefaultTraining
-import logging
-import numpy as np
-from util import Util
 import spacy
 from spacy.util import minibatch
 from spacy.training import Example
-
-logging.basicConfig(level=logging.INFO, handlers=[logging.FileHandler("../info.txt", 'w', 'utf-8')])
-log = logging.getLogger("training-log")
 
 
 class TrainingIntent(DefaultTraining):
