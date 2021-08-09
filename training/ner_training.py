@@ -74,7 +74,7 @@ class TrainingNER(DefaultTraining):
         self.model = keras.Sequential([
             keras.layers.Embedding(self.to_vector.vocabulary_size(), self.EMBEDDING_DIM, input_length=padding),
             keras.layers.Bidirectional(keras.layers.LSTM(64)),
-            keras.layers.Dense(64, activation="softmax"),
+            keras.layers.Dense(64, activation="relu"),
             keras.layers.Dense(padding, activation="softmax"),
         ])
         """
@@ -88,7 +88,7 @@ class TrainingNER(DefaultTraining):
         super(TrainingNER, self).__compile_model__()
         self.model.summary(print_fn=lambda x: log.info(x))
         self.model.compile(optimizer='adam',
-                           loss=tf.keras.losses.CosineSimilarity(axis = 2),
+                           loss=tf.keras.losses.CategoricalCrossentropy(),
                            metrics=['accuracy'])
 
     def execute(self):
@@ -98,6 +98,7 @@ class TrainingNER(DefaultTraining):
         self.__compile_model__()
         print(self.model.summary())
         y_one_hots = []
+        '''
         for entity_vec in self.preprocessing_data["class"]:
             y = np.array(entity_vec)
             y_one_hot = np.zeros((y.size, len(self.entities)))
@@ -105,7 +106,8 @@ class TrainingNER(DefaultTraining):
             #y_one_hot = y_one_hot[:, 1:]
             y_one_hots.append(np.array(y_one_hot))
             #print(y_one_hot)
-        y_one_hots = np.array(y_one_hots)
+        '''
+        y_one_hots = np.array([(np.array(phrase_vec) > 0) * 1 for phrase_vec in self.preprocessing_data["class"]])
         history = self.model.fit(
             x=np.array([np.array(phrase_vec) for phrase_vec in self.preprocessing_data["tokenized"]]),
             y=y_one_hots,
@@ -142,7 +144,7 @@ if __name__ == '__main__':
     print(grouped)
     print(t.data)
     t.execute()
-    phrase = "O Justin é maior paia"
+    phrase = "O Justin é maior paia. O Professor Clóvis já é legal."
     phrase = Util.remove_punctuation(phrase)
     phrase = Util.remove_stopwords(phrase, t.stopwords)
     phrase = phrase.replace("\r\n", " ")
@@ -152,4 +154,5 @@ if __name__ == '__main__':
     result[:input.shape[0]] = input
     input = np.array([result])
     print(t.model.predict(input))
+    print((t.model.predict(input)[0] > .3) * 1)
 

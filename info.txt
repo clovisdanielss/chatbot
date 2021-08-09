@@ -4,15 +4,13 @@ INFO:training-log:Layer (type)                 Output Shape              Param #
 INFO:training-log:=================================================================
 INFO:training-log:embedding (Embedding)        (None, 29, 100)           133200    
 INFO:training-log:_________________________________________________________________
-INFO:training-log:bidirectional (Bidirectional (None, 29, 128)           84480     
+INFO:training-log:bidirectional (Bidirectional (None, 128)               84480     
 INFO:training-log:_________________________________________________________________
-INFO:training-log:dense (Dense)                (None, 29, 64)            8256      
+INFO:training-log:dense (Dense)                (None, 64)                8256      
 INFO:training-log:_________________________________________________________________
-INFO:training-log:bidirectional_1 (Bidirection (None, 29, 128)           66048     
-INFO:training-log:_________________________________________________________________
-INFO:training-log:dense_1 (Dense)              (None, 29, 6)             774       
+INFO:training-log:dense_1 (Dense)              (None, 29)                1885      
 INFO:training-log:=================================================================
-INFO:training-log:Total params: 292,758
-INFO:training-log:Trainable params: 292,758
+INFO:training-log:Total params: 227,821
+INFO:training-log:Trainable params: 227,821
 INFO:training-log:Non-trainable params: 0
 INFO:training-log:_________________________________________________________________
