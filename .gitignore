@@ -2,5 +2,9 @@
 ./venv*
 ./__*
 ./chatbot.h5
-./vocabulary*
+./vocab*
 ./ner*
+./*json
+./*cfg
+./tokenizer
+./textcat_multilabel*

@@ -25,14 +25,10 @@ class DefaultTraining:
             raise ValueError("Intent must not be None")
         pass
 
-    def __vectorize__(self):
-        if self.preprocessing_data is None:
-            raise ValueError("preprocessing_data must not be None. Call first __preprocess__")
-        pass
 
     def __build_model__(self):
-        if self.preprocessing_data is None or self.to_vector is None:
-            raise ValueError("Must execute first __preprocess__ or __vectorize__")
+        if self.preprocessing_data is None:
+            raise ValueError("Must execute first __preprocess__")
         pass
 
     def __compile_model__(self):

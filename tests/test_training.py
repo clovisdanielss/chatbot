@@ -43,20 +43,8 @@ class TestTraining(unittest.TestCase):
 
     def test_preprocess(self):
         self.training_intent.__preprocess__()
-        self.assertTrue(isinstance(self.training_intent.preprocessing_data, pd.DataFrame))
-        self.assertTrue("class" in list(self.training_intent.preprocessing_data.columns))
-        self.assertTrue("phrase" in list(self.training_intent.preprocessing_data.columns))
-        self.assertTrue(self.training_intent.preprocessing_data["class"].unique().size == self.training_intent.data.shape[0])
+        self.assertTrue(isinstance(self.training_intent.preprocessing_data, list))
 
-    def test_vectorize(self):
-        self.training_intent.__preprocess__()
-        self.training_intent.__vectorize__()
-        self.assertTrue("tokenized" in list(self.training_intent.preprocessing_data.columns))
-        for i in range(self.training_intent.preprocessing_data.shape[0]):
-            token = self.training_intent.preprocessing_data.iloc[i].tokenized
-            zeros = sum([1 for ele in token if ele == 0])
-            phrase = self.training_intent.preprocessing_data.iloc[i].phrase
-            self.assertTrue(len(token) - zeros == len(phrase.split(" ")))
 
 if __name__ == "__main__":
     unittest.main()

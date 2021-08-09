@@ -4,10 +4,7 @@ import pandas as pd
 from util import Util
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-from tensorflow import keras
 from training.default_training import DefaultTraining
-from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
-import tensorflow as tf
 import json
 import logging
 import numpy as np
