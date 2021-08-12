@@ -1,0 +1,2 @@
+class DefaultMediator:
+    pass

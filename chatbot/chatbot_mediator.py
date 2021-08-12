@@ -1,8 +1,9 @@
+from chatbot.default_mediator import DefaultMediator
 from strategies.default_strategy import DefaultStrategy
 from predictor.default_predictor import DefaultPredictor
 
 
-class ChatbotMediator:
+class ChatbotMediator(DefaultMediator):
 
     def __init__(self, path_model):
         self.__strategies = []
@@ -11,6 +12,7 @@ class ChatbotMediator:
     def add_strategy(self, strategy: DefaultStrategy):
         if not issubclass(type(strategy), DefaultStrategy):
             raise ValueError("An strategy must inherit from DefaultStrategy")
+        strategy.subscribe_on(self)
         self.__strategies.append(strategy)
 
     def notify(self, message: str) -> None:
