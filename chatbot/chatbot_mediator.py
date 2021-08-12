@@ -1,18 +1,21 @@
+from strategies.response_strategy import ResponseStrategy
+from predictor.default_predictor import DefaultPredictor
+
+
 class ChatbotMediator:
 
-    def __init__(self):
-        self.response_generator = None
+    def __init__(self, path_model):
+        self.strategies = []
+        self.__predictor = DefaultPredictor(path_model)
 
-    def set_response_generator(self, response_generator):
-        self.response_generator = response_generator
+    def add_strategy(self, response_generator: ResponseStrategy):
+        self.strategies.append(response_generator)
 
     def notify(self, message: str) -> None:
         if type(message) is not str:
             raise ValueError("message must be string")
-        self._response_generator_action(message)
+        doc = self.__predictor.model(message)
+        for strategy in self.strategies:
+            if strategy.execute:
+                strategy.execute(doc)
 
-    def _response_generator_action(self, message: str) -> None:
-        if self.response_generator is None:
-            raise ValueError("response_generator must be setted")
-        response = self.response_generator.get_response(message)
-        print("Chatbot:", response)
