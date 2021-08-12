@@ -1,2 +1,7 @@
 class DefaultMediator:
-    pass
+
+    def update(self, user_id, data):
+        pass
+
+    def notify(self, message):
+        pass
