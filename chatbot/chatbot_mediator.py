@@ -21,7 +21,9 @@ class ChatbotMediator(DefaultMediator):
         doc = self.__predictor.model(message.text)
         output: Message = Message("", message.message_id)
         for strategy in self.__strategies:
+            if len(message.expected_strategy) != 0 and type(strategy).__name__ not in message.expected_strategy:
+                continue
             if strategy.execute:
-                strategy.execute(ProcessedMessage(doc, message.message_id), output)
+                strategy.execute(ProcessedMessage(doc, message), output)
         return output
 
