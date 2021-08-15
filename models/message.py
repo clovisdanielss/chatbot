@@ -1,5 +1,5 @@
 class Message:
 
-    def __init__(self, text: str, userid: int):
+    def __init__(self, text: str, message_id: int):
         self.text = text
-        self.user_id = userid
+        self.message_id = message_id

@@ -26,14 +26,9 @@ class ResponseStrategy(DefaultStrategy):
         responses = self.__intents.iloc[intent_index].responses
         return responses[random.randint(0, len(responses) - 1)] + " {0:.2f}".format(confidence)
 
-    def execute(self, message: ProcessedMessage) -> None:
-        print(self.__get_response__(message.text))
-        message = Message(message.text.text, message.user_id)
-        self._update(message.user_id, message)
-
-    def _update(self, user_id: int, data):
-        super(ResponseStrategy, self)._update(user_id, data)
-        self._observer.update(user_id, data)
+    def execute(self, message: ProcessedMessage, output: Message) -> None:
+        text = self.__get_response__(message.text)
+        output.text = text
 
 
 if "__main__" == __name__:

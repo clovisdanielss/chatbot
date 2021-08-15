@@ -3,6 +3,6 @@ from spacy.tokens import Doc
 
 class ProcessedMessage:
 
-    def __init__(self, doc: Doc, user_id: int):
+    def __init__(self, doc: Doc, message_id: int):
         self.text = doc
-        self.user_id = user_id
+        self.message_id = message_id
