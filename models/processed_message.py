@@ -9,3 +9,4 @@ class ProcessedMessage:
         self.text = doc
         self.message_id = message.message_id
         self.expect_response: bool = message.expect_response
+        self.metadata = message.metadata

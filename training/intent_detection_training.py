@@ -67,8 +67,7 @@ class TrainingIntent(DefaultTraining):
 
 if __name__ == '__main__':
     path = os.path.join(os.path.dirname(__file__), "../dataset/intents.json")
-    training = TrainingIntent(path)
-    training.load_model("..")
+    training = TrainingIntent(path, existing_model="pt_core_news_sm")
     training.execute()
     print(training.model("Olá, meu nome é Clóvis"))
     docs = list(training.model.pipe(["Olá, meu nome é Clóvis",
@@ -77,5 +76,8 @@ if __name__ == '__main__':
                                      "Pra que vocÊ serve?",
                                      "Quem te fez ?"]))
     scores = training.model.get_pipe("textcat_multilabel").predict(docs)
-    print(scores.argmax(axis=1), training.model.get_pipe("textcat_multilabel").labels)
+    scores = scores.argmax(axis=1)
+    for score in scores:
+        print(training.model.get_pipe("textcat_multilabel").labels[score])
+    print(training.model.get_pipe("textcat_multilabel").labels)
     training.save_model("..")

@@ -1,4 +1,6 @@
 import random
+from typing import Callable
+
 import numpy as np
 import pandas
 
@@ -14,6 +16,7 @@ class ResponseStrategy(DefaultStrategy):
         super(ResponseStrategy, self).__init__()
         self.__intents = pandas.read_json(path_intents)
         self.confidence_limit = confidence_limit
+        self.__handle_intent = None
 
     def __get_intent_index__(self, phrase: Doc) -> (int, float):
         prediction = np.array(list(phrase.cats.values()))
@@ -28,10 +31,19 @@ class ResponseStrategy(DefaultStrategy):
         intent_name = self.__intents.name.iloc[intent_index]
         return intent_name, responses[random.randint(0, len(responses) - 1)], confidence
 
+    def __handle_intent__(self, intent_name: str, text: str, metadata:dict, output: Message):
+        if self.__handle_intent:
+            self.__handle_intent(intent_name, text, metadata, output)
+        else:
+            output.text = text
+
+    def set_handle_intent(self, handle_intent: Callable[[str, str, dict, Message], None]):
+        self.__handle_intent = handle_intent
+
     def execute(self, message: ProcessedMessage, output: Message) -> None:
         intent_name, text, confidence = self.__get_response__(message.text)
         if confidence > self.confidence_limit:
-            output.text = text + " {0:.2f}".format(confidence)
+            self.__handle_intent__(intent_name, text, message.metadata, output)
             output.intent_found = intent_name
         else:
             output.intent_found = False

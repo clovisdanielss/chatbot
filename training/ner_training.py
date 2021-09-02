@@ -54,7 +54,7 @@ class TrainingNER(DefaultTraining):
 
     def __train__(self):
         super(TrainingNER, self).__train__()
-        other_pipes = [pipe for pipe in self.model.pipe_names if pipe != 'ner']
+        other_pipes = []#[pipe for pipe in self.model.pipe_names if pipe != 'ner']
         with self.model.disable_pipes(other_pipes):
             optimizer = self.model.create_optimizer()
             for epoch in range(self.epochs):
@@ -92,7 +92,7 @@ class TrainingNER(DefaultTraining):
 
 if __name__ == '__main__':
     t = TrainingNER("../dataset/twitter.train.csv", existing_model="pt_core_news_sm")
-    docs = list(t.model.pipe(["Olá, meu nome é Clóvis e eu trabalho na ChatbotMAker só sei que esse modelo deu bem errado tio. Paulo Ferreira é um cara legal e vive em Nova York"]))
+    #t.execute()
     doc = t.model("Olá, meu nome é Clóvis Daniel e eu trabalho na ChatbotMAker só sei que esse modelo deu bem errado tio. Paulo Ferreira é um cara legal e vive em Nova York")
     print(doc.ents, doc.cats)
     print('Entities', [(ent.text, ent.label_) for ent in doc.ents])

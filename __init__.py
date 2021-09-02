@@ -17,8 +17,16 @@ def send_message(message: Message):
         print(text)
 
 
+def handle_intent(intent_name: str, text: str, metadata: dict, output: Message):
+    if intent_name == "QUEMSOUEU":
+        output.text = text.replace("{name}", metadata["PER"].text)
+    else:
+        output.text = text
+
+
 if __name__ == '__main__':
     selector = ResponseStrategy("dataset/intents.json")
+    selector.set_handle_intent(handle_intent)
     ask_name = AfterIntentStrategy("dataset/intents.json", "BOASVINDAS", "Qual o seu nome ?", "Muito prazer, {0}!")
     chatbot = ChatbotMediator(".")
     repo = FakeRepository("./repository/fake_storage.json")
