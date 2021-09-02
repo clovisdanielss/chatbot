@@ -16,40 +16,43 @@ class TrainingNER(DefaultTraining):
 
     def __init__(self, path, existing_model=None):
         super().__init__(path, existing_model)
-        self.data = pd.read_csv(path, sep=',')
+        self.data = pd.read_json(path)
         self.entities = None
 
     def __preprocess__(self):
         super(TrainingNER, self).__preprocess__()
-        entities = self.data["named_entity_type"].unique().tolist()
+        entities = self.data["entities"]
         self.entities = dict([(entities[i], i) for i in range(len(entities))])
         phrases = []
         j = -1
+        print(self.data.head())
         for i in range(self.data.shape[0]):
-            if i <= j:
+            if i < j:
                 continue
             j = i
-            phrase = self.data["phrases"].iloc[j]
+            phrase = self.data["phrase"].iloc[j]
             phrase = phrase.replace('\n', ' ')
             phrase = phrase.replace('\t', ' ')
             entities = {'entities': []}
-            while self.data.iloc[j].tweet_id == self.data.iloc[i].tweet_id:
-                if abs(self.data.iloc[j].start_pos - self.data.iloc[j].end_pos) > 1:
-                    start = self.data.iloc[j].start_pos - 1
-                    end = self.data.iloc[j].end_pos
-                    entity = (start, end, self.data.named_entity_type.iloc[j])
-                    if entity not in entities['entities']:
-                        entities['entities'].append(entity)
+            phrase_ = phrase[:]
+            end = 0
+            print(phrase)
+            while self.data.iloc[j].id == self.data.iloc[i].id:
+                start = end + phrase_.index(self.data.iloc[j].word)
+                end = start + len(self.data.iloc[j].word)
+                phrase_ = phrase[end:]
+                entity = (start, end, self.data.entities.iloc[j])
+                entities['entities'].append(entity)
                 j = j + 1
                 if j >= self.data.shape[0]:
                     break
             phrases.append((phrase, entities))
         self.preprocessing_data = phrases
-
+        print(self.preprocessing_data)
     def __build_model__(self):
         super(TrainingNER, self).__build_model__("pt", "ner", self.entities)
 
-    def __compile_model__(self, epochs=1, batch_size=128):
+    def __compile_model__(self, epochs=20, batch_size=1):
         super(TrainingNER, self).__compile_model__(epochs, batch_size)
 
     def __train__(self):
@@ -91,9 +94,9 @@ class TrainingNER(DefaultTraining):
 
 
 if __name__ == '__main__':
-    t = TrainingNER("../dataset/twitter.train.csv", existing_model="pt_core_news_sm")
-    #t.execute()
-    doc = t.model("Olá, meu nome é Clóvis Daniel e eu trabalho na ChatbotMAker só sei que esse modelo deu bem errado tio. Paulo Ferreira é um cara legal e vive em Nova York")
+    t = TrainingNER("../dataset/entities.json", existing_model="pt_core_news_sm")
+    t.execute()
+    doc = t.model("Meu nome é Clóvis. Esta praga desse rato pensa q não morre. Odeio ratos")
     print(doc.ents, doc.cats)
     print('Entities', [(ent.text, ent.label_) for ent in doc.ents])
-    t.save_model("..")
+    #t.save_model("..")
