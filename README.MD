@@ -1,4 +1,4 @@
-This is an chatbot project using tensorflow.
+This is an chatbot project using spacy.
 You must first create a file named intents.json to use this program and put in dataset folder.
 the json must be of the format:
 
