@@ -4,10 +4,10 @@ from typing import Callable
 import numpy as np
 import pandas
 
+from models.doc import DocProxy
 from models.message import Message
 from models.processed_message import ProcessedMessage
 from predictor.default_predictor import DefaultPredictor
-from spacy.tokens import Doc
 from strategies.default_strategy import DefaultStrategy
 
 
@@ -18,12 +18,12 @@ class ResponseStrategy(DefaultStrategy):
         self.confidence_limit = confidence_limit
         self.__handle_intent = None
 
-    def __get_intent_index__(self, phrase: Doc) -> (int, float):
+    def __get_intent_index__(self, phrase: DocProxy) -> (int, float):
         prediction = np.array(list(phrase.cats.values()))
         intent_index, confidence = prediction.argmax(axis=0), prediction.max(axis=0)
         return intent_index, confidence
 
-    def __get_response__(self, phrase: Doc) -> (str, str, float):
+    def __get_response__(self, phrase: DocProxy) -> (str, str, float):
         intent_index, confidence = self.__get_intent_index__(phrase)
         intent_index = intent_index
         confidence = confidence

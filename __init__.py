@@ -18,7 +18,7 @@ def send_message(message: Message):
 
 
 def handle_intent(intent_name: str, text: str, metadata: dict, output: Message):
-    if intent_name == "QUEMSOUEU":
+    if intent_name == "QUEMSOUEU" and "PER" in metadata.keys():
         output.text = text.replace("{name}", metadata["PER"].text)
     else:
         output.text = text
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     selector = ResponseStrategy("dataset/intents.json")
     selector.set_handle_intent(handle_intent)
     ask_name = AfterIntentStrategy("dataset/intents.json", "BOASVINDAS", "Qual o seu nome ?", "Muito prazer, {0}!")
-    chatbot = ChatbotMediator(".")
+    chatbot = ChatbotMediator("./nlp")
     repo = FakeRepository("./repository/fake_storage.json")
     chatbot.add_strategy(selector)
     chatbot.add_strategy(ask_name)
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     response = None
     while True:
         message = input("Você:")
-        message = Message(message, 0)
+        message = Message(message, round(random.random()*10000))
         if response is not None:
             message.copy(response)
         response = chatbot.notify(message)

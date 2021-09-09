@@ -33,7 +33,7 @@ class TrainingIntent(DefaultTraining):
     def __build_model__(self):
         super(TrainingIntent, self).__build_model__("pt", "textcat_multilabel", self.data.name.unique())
 
-    def __compile_model__(self,epochs=20, batch_size=5):
+    def __compile_model__(self, epochs=20, batch_size=5):
         super(TrainingIntent, self).__compile_model__(epochs, batch_size)
 
     def __train__(self):
@@ -65,9 +65,9 @@ class TrainingIntent(DefaultTraining):
         self.model.to_disk(path)
 
 
-if __name__ == '__main__':
+def execute():
     path = os.path.join(os.path.dirname(__file__), "../dataset/intents.json")
-    training = TrainingIntent(path, existing_model="pt_core_news_sm")
+    training = TrainingIntent(path, existing_model="../nlp")
     training.execute()
     print(training.model("Olá, meu nome é Clóvis"))
     docs = list(training.model.pipe(["Olá, meu nome é Clóvis",
@@ -80,4 +80,8 @@ if __name__ == '__main__':
     for score in scores:
         print(training.model.get_pipe("textcat_multilabel").labels[score])
     print(training.model.get_pipe("textcat_multilabel").labels)
-    training.save_model("..")
+    training.save_model("../nlp")
+
+
+if __name__ == '__main__':
+    execute()

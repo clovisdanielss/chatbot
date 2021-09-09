@@ -17,3 +17,6 @@ class Message:
         self.intent_found = message.intent_found
         self.metadata = message.metadata
 
+    def copy_metadata(self, message):
+        self.metadata = message.metadata
+

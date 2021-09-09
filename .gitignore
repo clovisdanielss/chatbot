@@ -6,9 +6,10 @@
 ./ner*
 ./*json
 ./*cfg
-./tokenizer
+nlp/tokenizer
 ./textcat_multilabel*
 ./lemmatizer*
 ./senter*
 ./tok2vec*
 ./parser*
+./nlp*

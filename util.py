@@ -1,3 +1,5 @@
+import re
+
 class Util:
     punctuation = ["?", ".", ",", "!", ";", ":", ")", "(", "\"", "/", "\\", "-", "“", "”", "@", "+"]
 
@@ -14,3 +16,10 @@ class Util:
         for _ in stopwords:
             phrase = phrase.replace(_, "")
         return phrase.strip()
+
+    @staticmethod
+    def preprocess(phrase, stopwords=None):
+        phrase = Util.remove_punctuation(phrase)
+        if stopwords:
+            phrase = Util.remove_stopwords(phrase, stopwords)
+        return phrase.lower()

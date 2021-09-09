@@ -18,8 +18,9 @@ class ChatbotMediator(DefaultMediator):
         self.__strategies.append(strategy)
 
     def notify(self, message: Message) -> Message:
-        doc = self.__predictor.model(message.text)
+        doc = self.__predictor.predict(message.text)
         output: Message = Message("", message.message_id)
+        output.copy_metadata(message)
         for strategy in self.__strategies:
             if len(message.expected_strategy) != 0 and type(strategy).__name__ not in message.expected_strategy:
                 continue

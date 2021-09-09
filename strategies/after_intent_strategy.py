@@ -1,7 +1,7 @@
 import numpy as np
 import pandas
-from spacy.tokens import Doc
 
+from models.doc import DocProxy
 from models.message import Message
 from models.processed_message import ProcessedMessage
 from strategies.default_strategy import DefaultStrategy
@@ -18,7 +18,7 @@ class AfterIntentStrategy(DefaultStrategy):
         self.__entity_label = metadata_label
         self.__response_message = response_message
 
-    def __get_intent_index__(self, phrase: Doc) -> (int, float):
+    def __get_intent_index__(self, phrase: DocProxy) -> (int, float):
         prediction = np.array(list(phrase.cats.values()))
         intent_index, confidence = prediction.argmax(axis=0), prediction.max(axis=0)
         return intent_index, confidence
