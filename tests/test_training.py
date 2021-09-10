@@ -2,7 +2,7 @@ import random
 import unittest
 
 import util
-from training.intent_detection_training import TrainingIntent
+from training.spacy_intent_detection_training import SpacyTrainingIntent
 import pandas as pd
 import os
 
@@ -11,7 +11,7 @@ class TestTraining(unittest.TestCase):
 
     def setUp(self) -> None:
         self.path = os.path.join(os.path.dirname(__file__), "../dataset/intents.json")
-        training_intent = TrainingIntent(self.path)
+        training_intent = SpacyTrainingIntent(self.path)
         self.training_intent = training_intent
 
     def tearDown(self) -> None:

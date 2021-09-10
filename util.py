@@ -1,5 +1,3 @@
-import re
-
 class Util:
     punctuation = ["?", ".", ",", "!", ";", ":", ")", "(", "\"", "/", "\\", "-", "“", "”", "@", "+"]
 
@@ -23,3 +21,4 @@ class Util:
         if stopwords:
             phrase = Util.remove_stopwords(phrase, stopwords)
         return phrase.lower()
+

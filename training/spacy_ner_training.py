@@ -1,28 +1,23 @@
-import os
 import pandas as pd
 import random
 
-from util import Util
-
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-from training.default_training import DefaultTraining
-import logging
 import spacy
+
+from util import Util
+from training.default_training import DefaultTraining
 from spacy.util import minibatch
 from spacy.training import Example
 
-log = logging.getLogger("training-log")
 
+class SpacyTrainingNER(DefaultTraining):
 
-class TrainingNER(DefaultTraining):
-
-    def __init__(self, path, existing_model=None):
-        super().__init__(path, existing_model)
-        self.data = pd.read_json(path)
+    def __init__(self, ner_path):
+        super().__init__()
+        self.data = pd.read_json(ner_path)
         self.entities = None
 
     def __preprocess__(self):
-        super(TrainingNER, self).__preprocess__()
+        super(SpacyTrainingNER, self).__preprocess__()
         entities = self.data["entities"]
         self.entities = dict([(entities[i], i) for i in range(len(entities))])
         phrases = []
@@ -50,14 +45,21 @@ class TrainingNER(DefaultTraining):
         self.preprocessing_data = phrases
         print(self.preprocessing_data)
 
-    def __build_model__(self):
-        super(TrainingNER, self).__build_model__("pt", "ner", self.entities)
+    def __build_model__(self, language="pt", model_name="ner"):
+        super(SpacyTrainingNER, self).__build_model__()
+        labels = self.entities
+        if self.model is None:
+            self.model = spacy.load("pt_core_news_sm")
+        if not self.model.has_pipe(model_name):
+            ner = self.model.add_pipe(model_name)
+            for label in labels:
+                ner.add_label(label)
 
-    def __compile_model__(self, epochs=20, batch_size=1):
-        super(TrainingNER, self).__compile_model__(epochs, batch_size)
+    def __compile_model__(self, ephocs=20, batch_size=1):
+        super(SpacyTrainingNER, self).__compile_model__(ephocs, batch_size)
 
     def __train__(self):
-        super(TrainingNER, self).__train__()
+        super(SpacyTrainingNER, self).__train__()
         other_pipes = [pipe for pipe in self.model.pipe_names if pipe != 'ner']
         with self.model.disable_pipes(other_pipes):
             optimizer = self.model.create_optimizer()
@@ -72,15 +74,21 @@ class TrainingNER(DefaultTraining):
                     print(loss)
 
     def execute(self):
-        super(TrainingNER, self).execute()
+        super(SpacyTrainingNER, self).execute()
         self.__preprocess__()
         self.__build_model__()
         self.__compile_model__()
         self.__train__()
 
     def save_model(self, path):
-        super(TrainingNER, self).save_model(path)
+        super(SpacyTrainingNER, self).save_model(path)
         self.model.to_disk(path)
+
+    def load_model(self, path="../nlp/spacy"):
+        super(SpacyTrainingNER, self).load_model(path)
+        if path:
+            self.model = spacy.load(path)
+            self.model.from_disk(path)
 
     @staticmethod
     def reload_data():
@@ -95,13 +103,13 @@ class TrainingNER(DefaultTraining):
 
 
 def execute():
-    t = TrainingNER("../dataset/entities.json", existing_model="../nlp")
+    t = SpacyTrainingNER("../dataset/entities.json")
     t.execute()
     doc = t.model("Meu nome é Clóvis. Esta praga desse rato pensa q não morre. Odeio ratos, assim como Francisco. Cadê "
                   "o time comercial. O comercial é show!!")
     print(doc.ents, doc.cats)
     print('Entities', [(ent.text, ent.label_) for ent in doc.ents])
-    t.save_model("../nlp")
+    t.save_model("../nlp/spacy")
 
 
 if __name__ == '__main__':

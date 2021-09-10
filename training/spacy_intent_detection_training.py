@@ -1,22 +1,23 @@
-import os
 import random
-
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import pandas as pd
-from training.default_training import DefaultTraining
 import spacy
+
+from training.default_training import DefaultTraining
+
 from spacy.util import minibatch
 from spacy.training import Example
 
+from util import Util
 
-class TrainingIntent(DefaultTraining):
 
-    def __init__(self, path, existing_model=None):
-        super().__init__(path, existing_model)
-        self.data = pd.read_json(path)
+class SpacyTrainingIntent(DefaultTraining):
+
+    def __init__(self, intents_path):
+        super().__init__()
+        self.data = pd.read_json(intents_path)
 
     def __preprocess__(self):
-        super(TrainingIntent, self).__preprocess__()
+        super(SpacyTrainingIntent, self).__preprocess__()
         phrases = []
         intents = []
         for intent in self.data.name.unique():
@@ -30,14 +31,20 @@ class TrainingIntent(DefaultTraining):
                 phrases.append((phrase, cats))
         self.preprocessing_data = phrases
 
-    def __build_model__(self):
-        super(TrainingIntent, self).__build_model__("pt", "textcat_multilabel", self.data.name.unique())
+    def __build_model__(self, language="pt", model_name="textcat_multilabel"):
+        labels = self.data.name.unique()
+        if self.model is None:
+            self.model = spacy.load("pt_core_news_sm")
+        if not self.model.has_pipe(model_name):
+            ner = self.model.add_pipe(model_name)
+            for label in labels:
+                ner.add_label(label)
 
-    def __compile_model__(self, epochs=20, batch_size=5):
-        super(TrainingIntent, self).__compile_model__(epochs, batch_size)
+    def __compile_model__(self, ephocs=20, batch_size=5):
+        super(SpacyTrainingIntent, self).__compile_model__(ephocs, batch_size)
 
     def __train__(self):
-        super(TrainingIntent, self).__train__()
+        super(SpacyTrainingIntent, self).__train__()
         other_pipes = [pipe for pipe in self.model.pipe_names if pipe != 'textcat_multilabel']
         print(other_pipes)
         with self.model.disable_pipes(other_pipes):
@@ -54,20 +61,27 @@ class TrainingIntent(DefaultTraining):
                     print(loss)
 
     def execute(self):
-        super(TrainingIntent, self).execute()
+        super(SpacyTrainingIntent, self).execute()
         self.__preprocess__()
         self.__build_model__()
         self.__compile_model__()
         self.__train__()
 
     def save_model(self, path):
-        super(TrainingIntent, self).save_model(path)
+        super(SpacyTrainingIntent, self).save_model(path)
         self.model.to_disk(path)
+
+    def load_model(self, path="../nlp/spacy"):
+        super(SpacyTrainingIntent, self).load_model(path)
+        if path:
+            self.model = spacy.load(path)
+            self.model.from_disk(path)
 
 
 def execute():
-    path = os.path.join(os.path.dirname(__file__), "../dataset/intents.json")
-    training = TrainingIntent(path, existing_model="../nlp")
+    path = "../dataset/intents.json"
+    training = SpacyTrainingIntent(path)
+    training.load_model()
     training.execute()
     print(training.model("Olá, meu nome é Clóvis"))
     docs = list(training.model.pipe(["Olá, meu nome é Clóvis",
@@ -80,7 +94,7 @@ def execute():
     for score in scores:
         print(training.model.get_pipe("textcat_multilabel").labels[score])
     print(training.model.get_pipe("textcat_multilabel").labels)
-    training.save_model("../nlp")
+    training.save_model("../nlp/spacy")
 
 
 if __name__ == '__main__':

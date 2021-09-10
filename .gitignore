@@ -6,7 +6,7 @@
 ./ner*
 ./*json
 ./*cfg
-nlp/tokenizer
+nlp/spacy/tokenizer
 ./textcat_multilabel*
 ./lemmatizer*
 ./senter*
