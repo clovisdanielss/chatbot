@@ -4,7 +4,7 @@ from typing import Callable
 import numpy as np
 import pandas
 
-from models.doc import DocProxy
+from models.proxy import DocProxy
 from models.message import Message
 from models.processed_message import ProcessedMessage
 from predictor.default_predictor import DefaultPredictor

@@ -1,6 +1,6 @@
 import os
 
-from models.doc import DocProxy
+from models.proxy import DocProxy
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import spacy
@@ -13,9 +13,7 @@ class DefaultPredictor:
         self.__load_model__(path_model)
 
     def __load_model__(self, path_model: str):
-        self.model = spacy.load(path_model)
-        self.model.from_disk(path_model)
+        pass
 
     def predict(self, phrase: str, debug: bool = False) -> DocProxy:
-        doc = self.model(phrase)
-        return DocProxy(doc)
+        pass

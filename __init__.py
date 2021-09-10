@@ -1,6 +1,7 @@
 import os
 import random
 
+from predictor.spacy_predictor import SpacyPredictor
 from repository.fake_repository import FakeRepository
 from strategies.after_intent_strategy import AfterIntentStrategy
 
@@ -28,7 +29,7 @@ if __name__ == '__main__':
     selector = ResponseStrategy("dataset/intents.json")
     selector.set_handle_intent(handle_intent)
     ask_name = AfterIntentStrategy("dataset/intents.json", "BOASVINDAS", "Qual o seu nome ?", "Muito prazer, {0}!")
-    chatbot = ChatbotMediator("./nlp")
+    chatbot = ChatbotMediator(SpacyPredictor("./nlp"))
     repo = FakeRepository("./repository/fake_storage.json")
     chatbot.add_strategy(selector)
     chatbot.add_strategy(ask_name)

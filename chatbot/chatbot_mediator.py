@@ -7,9 +7,9 @@ from predictor.default_predictor import DefaultPredictor
 
 class ChatbotMediator(DefaultMediator):
 
-    def __init__(self, path_model):
+    def __init__(self, predictor: DefaultPredictor):
         self.__strategies = []
-        self.__predictor = DefaultPredictor(path_model)
+        self.__predictor = predictor
 
     def add_strategy(self, strategy: DefaultStrategy):
         if not issubclass(type(strategy), DefaultStrategy):

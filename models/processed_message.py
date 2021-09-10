@@ -1,4 +1,4 @@
-from models.doc import DocProxy
+from models.proxy import DocProxy
 from models.message import Message
 
 
