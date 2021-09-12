@@ -19,10 +19,16 @@ retornada do spacy.
 
 class DocProxy:
 
-    def __init__(self, doc: Doc):
-        self.text: str = doc.text
-        self.cats: dict = doc.cats
-        self.ents: List[EntProxy] = [EntProxy(ent) for ent in doc.ents]
+    def __init__(self, doc: Doc = None):
+        if doc is None:
+            self.text: str = ""
+            self.cats: dict = dict()
+            self.ents: List[EntProxy] = list()
+        else:
+            self.text: str = doc.text
+            self.cats: dict = doc.cats
+            self.ents: List[EntProxy] = [EntProxy(ent) for ent in doc.ents]
+
 
 
 class EntProxy:

@@ -17,3 +17,10 @@ class DefaultPredictor:
 
     def predict(self, phrase: str, debug: bool = False) -> DocProxy:
         pass
+
+    def __build_cats__(self, predict):
+        pass
+
+    def __build_ents__(self, predict):
+        pass
+

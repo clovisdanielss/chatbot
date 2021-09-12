@@ -2,6 +2,7 @@ import os
 import random
 
 from predictor.spacy_predictor import SpacyPredictor
+from predictor.tensorflow_predictor import TensorflowPredictor
 from repository.fake_repository import FakeRepository
 from strategies.after_intent_strategy import AfterIntentStrategy
 
@@ -28,11 +29,12 @@ def handle_intent(intent_name: str, text: str, metadata: dict, output: Message):
 if __name__ == '__main__':
     selector = ResponseStrategy("dataset/intents.json")
     selector.set_handle_intent(handle_intent)
-    ask_name = AfterIntentStrategy("dataset/intents.json", "BOASVINDAS", "Qual o seu nome ?", "Muito prazer, {0}!")
-    chatbot = ChatbotMediator(SpacyPredictor("./nlp"))
+    #ask_name = AfterIntentStrategy("dataset/intents.json", "BOASVINDAS", "Qual o seu nome ?", "Muito prazer, {0}!")
+    chatbot = ChatbotMediator(TensorflowPredictor("./nlp/tensorflow/intent_detector.h5",
+                                                  "./dataset/intents.json", "./nlp/tensorflow/vocabulary.json"))
     repo = FakeRepository("./repository/fake_storage.json")
     chatbot.add_strategy(selector)
-    chatbot.add_strategy(ask_name)
+    #chatbot.add_strategy(ask_name)
     print("Pode conversar:")
     response = None
     while True:

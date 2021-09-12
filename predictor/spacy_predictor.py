@@ -16,6 +16,16 @@ class SpacyPredictor(DefaultPredictor):
         self.model = spacy.load(path_model)
         self.model.from_disk(path_model)
 
+    def __build_cats__(self, predict):
+        return predict.cats
+
+    def __build_ents__(self, predict):
+        return predict.ents
+
     def predict(self, phrase: str, debug: bool = False) -> DocProxy:
-        doc = self.model(phrase)
-        return DocProxy(doc)
+        predict = self.model(phrase)
+        doc = DocProxy()
+        doc.cats = self.__build_cats__(predict)
+        doc.ents = self.__build_ents__(predict)
+        doc.text = predict.text
+        return doc

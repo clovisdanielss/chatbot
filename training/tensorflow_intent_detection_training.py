@@ -10,12 +10,14 @@ import json
 from training.default_training import DefaultTraining
 from util import Util
 
+
 class TensorflowTrainingIntent(DefaultTraining):
 
-    def __init__(self, intents_path: str, EMBEDDING_DIM=100):
+    def __init__(self, intents_path: str, EMBEDDING_DIM=100, PADDING=15):
         super(TensorflowTrainingIntent, self).__init__()
         self.intents = pd.read_json(intents_path)
         self.EMBEDDING_DIM = EMBEDDING_DIM
+        self.PADDING = PADDING
 
     def read_intents(self, path):
         self.intents = pd.read_json(path)
@@ -35,19 +37,22 @@ class TensorflowTrainingIntent(DefaultTraining):
         self.preprocessing_data = pd.DataFrame(phrases, columns=["class", "phrase"])
 
     def __vectorize__(self):
-        self.to_vector = TextVectorization(output_mode="int")
+        should_adapt = False
+        if self.to_vector is None:
+            self.to_vector = TextVectorization(output_mode="int", output_sequence_length=self.PADDING)
+            should_adapt = True
         if self.preprocessing_data is None:
             raise ValueError("preprocessing_data must not be None. Call first __preprocess__")
-        self.to_vector.adapt(self.preprocessing_data.phrase.to_list())
+        if should_adapt:
+            self.to_vector.adapt(self.preprocessing_data.phrase.to_list())
         tensor = self.to_vector(self.preprocessing_data["phrase"].to_numpy())
         self.preprocessing_data["tokenized"] = tensor.numpy().tolist()
 
     def __build_model__(self):
         if self.preprocessing_data is None or self.to_vector is None:
             raise ValueError("Must execute first __preprocess__ or __vectorize__")
-        padding = len(self.preprocessing_data["tokenized"].iloc[0])
         self.model = keras.Sequential([
-            keras.layers.Embedding(len(self.to_vector.get_vocabulary()), self.EMBEDDING_DIM, input_length=padding),
+            keras.layers.Embedding(len(self.to_vector.get_vocabulary()), self.EMBEDDING_DIM, input_length=self.PADDING),
             keras.layers.LSTM(self.intents.shape[0]),
             keras.layers.Dense(self.intents.shape[0], activation="softmax")
         ])
@@ -71,7 +76,7 @@ class TensorflowTrainingIntent(DefaultTraining):
             x=x,
             y=y,
             epochs=self.epochs,
-            steps_per_epoch=round(x.shape[0]/self.batch_size),
+            steps_per_epoch=round(x.shape[0] / self.batch_size),
             verbose=True,
         )
         print(history.history['accuracy'][-1])
@@ -85,16 +90,39 @@ class TensorflowTrainingIntent(DefaultTraining):
             json_file.write(json.dumps(vocabulary, ensure_ascii=False))
 
     def load_model(self, model_path="../nlp/tensorflow/intent_detector.h5",
-                          vocabulary_path="../nlp/tensorflow/vocabulary.json"):
+                   vocabulary_path="../nlp/tensorflow/vocabulary.json"):
         super(TensorflowTrainingIntent, self).load_model(model_path)
         if model_path:
             self.model = load_model(model_path)
             with open(vocabulary_path, "r", encoding="utf-8") as vocabulary:
-                self.to_vector = TextVectorization(output_mode="int", vocabulary=json.load(vocabulary))
+                self.to_vector = TextVectorization(output_mode="int", vocabulary=json.load(vocabulary),
+                                                   output_sequence_length=self.model.get_layer(
+                                                       index=0).input_length)
+
+
+def execute():
+    path = "../dataset/intents.json"
+    training = TensorflowTrainingIntent(path, PADDING=8)
+    training.load_model()
+    #training.execute()
+    docs = np.array([
+            "Oi",
+            "olá",
+            "Olá, meu nome é Clóvis",
+            "Qual o seu nome ?",
+            "Tudo bem com vc ?",
+            "Pra que vocÊ serve?",
+            "Quem te fez ?"])
+    vectors = training.to_vector(docs)
+    predict = training.model.predict(vectors)
+    intents = training.intents["name"]
+    labels = [intents.iloc[i] for i in range(training.intents.shape[0])]
+    print(np.argmax(predict, axis=1))
+    predict = np.argmax(predict, axis=1)
+    for intent in predict:
+        print(labels[intent])
+    training.save_model("intent_detector")
+
 
 if __name__ == '__main__':
-    path = "../dataset/intents.json"
-    training = TensorflowTrainingIntent(path)
-    training.load_model()
-    training.execute()
-    training.save_model("intent_detector")
+    execute()
