@@ -13,3 +13,4 @@ nlp/spacy/tokenizer
 ./tok2vec*
 ./parser*
 ./nlp*
+*pycache*

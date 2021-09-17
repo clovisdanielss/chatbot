@@ -1,3 +1,14 @@
+import re
+from tensorflow import keras
+import tensorflow as tf
+
+class LogSoftmax(keras.layers.Softmax):
+    def __init__(self):
+        super(LogSoftmax, self).__init__()
+
+    def call(self, inputs):
+        return tf.math.log(super(LogSoftmax, self).call(inputs))
+
 class Util:
     punctuation = ["?", ".", ",", "!", ";", ":", ")", "(", "\"", "/", "\\", "-", "“", "”", "@", "+"]
 
@@ -21,4 +32,10 @@ class Util:
         if stopwords:
             phrase = Util.remove_stopwords(phrase, stopwords)
         return phrase.lower()
+
+    @staticmethod
+    def tokenize(phrase):
+        return re.findall(r'\w+', Util.preprocess(phrase))
+
+
 

@@ -13,27 +13,27 @@ from util import Util
 
 class TensorflowTrainingIntent(DefaultTraining):
 
-    def __init__(self, intents_path: str, EMBEDDING_DIM=100, PADDING=15):
+    def __init__(self, data_path: str, EMBEDDING_DIM=100, PADDING=15):
         super(TensorflowTrainingIntent, self).__init__()
-        self.intents = pd.read_json(intents_path)
+        self.data = pd.read_json(data_path)
         self.EMBEDDING_DIM = EMBEDDING_DIM
         self.PADDING = PADDING
 
-    def read_intents(self, path):
-        self.intents = pd.read_json(path)
+    def read_data(self, path):
+        self.data = pd.read_json(path)
 
     def define_stopwords(self, stopwords):
         self.stopwords = stopwords
 
     def __preprocess__(self):
-        if self.intents is None:
-            raise ValueError("Intent must not be None")
+        if self.data is None:
+            raise ValueError("data must not be None")
         phrases = []
-        for i in range(self.intents.shape[0]):
-            for phrase in self.intents.iloc[i]["phrases"]:
+        for i in range(self.data.shape[0]):
+            for phrase in self.data.iloc[i]["phrases"]:
                 phrase = Util.remove_punctuation(phrase)
                 phrase = Util.remove_stopwords(phrase, self.stopwords)
-                phrases.append((self.intents.iloc[i].name, phrase))
+                phrases.append((self.data.iloc[i].name, phrase))
         self.preprocessing_data = pd.DataFrame(phrases, columns=["class", "phrase"])
 
     def __vectorize__(self):
@@ -49,12 +49,11 @@ class TensorflowTrainingIntent(DefaultTraining):
         self.preprocessing_data["tokenized"] = tensor.numpy().tolist()
 
     def __build_model__(self):
-        if self.preprocessing_data is None or self.to_vector is None:
-            raise ValueError("Must execute first __preprocess__ or __vectorize__")
+        super(TensorflowTrainingIntent, self).__build_model__()
         self.model = keras.Sequential([
             keras.layers.Embedding(len(self.to_vector.get_vocabulary()), self.EMBEDDING_DIM, input_length=self.PADDING),
-            keras.layers.LSTM(self.intents.shape[0]),
-            keras.layers.Dense(self.intents.shape[0], activation="softmax")
+            keras.layers.LSTM(self.data.shape[0]),
+            keras.layers.Dense(self.data.shape[0], activation="softmax")
         ])
 
     def __compile_model__(self, ephocs=100, batch_size=2):
@@ -101,7 +100,7 @@ class TensorflowTrainingIntent(DefaultTraining):
 
 
 def execute():
-    path = "../dataset/intents.json"
+    path = "../dataset/data.json"
     training = TensorflowTrainingIntent(path, PADDING=8)
     training.load_model()
     #training.execute()
@@ -115,8 +114,8 @@ def execute():
             "Quem te fez ?"])
     vectors = training.to_vector(docs)
     predict = training.model.predict(vectors)
-    intents = training.intents["name"]
-    labels = [intents.iloc[i] for i in range(training.intents.shape[0])]
+    data = training.data["name"]
+    labels = [data.iloc[i] for i in range(training.data.shape[0])]
     print(np.argmax(predict, axis=1))
     predict = np.argmax(predict, axis=1)
     for intent in predict:

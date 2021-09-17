@@ -22,7 +22,6 @@ class SpacyTrainingNER(DefaultTraining):
         self.entities = dict([(entities[i], i) for i in range(len(entities))])
         phrases = []
         j = -1
-        print(self.data.head())
         for i in range(self.data.shape[0]):
             if i < j:
                 continue
@@ -43,7 +42,6 @@ class SpacyTrainingNER(DefaultTraining):
                     break
             phrases.append((phrase, entities))
         self.preprocessing_data = phrases
-        print(self.preprocessing_data)
 
     def __build_model__(self, language="pt", model_name="ner"):
         super(SpacyTrainingNER, self).__build_model__()
